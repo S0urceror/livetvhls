@@ -10,7 +10,7 @@ let ffmpeg = FFMPEG.instance;
 // Create a new express application instance
 const app: express.Application = express();
 // The port the express app will listen on
-const port: number = Number(process.env.PORT) || 3000;
+const port: number = Number(process.env.PORT) || 8080;
 
 // Mount the TVController at the /tv route
 app.use('/video/:file',function (req, res, next) {
