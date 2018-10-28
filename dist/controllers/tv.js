@@ -14,11 +14,12 @@ const fs = require("fs");
 const empty = require("empty-folder");
 const cross_fetch_1 = require("cross-fetch");
 const xml2js = require("xml2js");
-const ffmpeg_1 = require("../ffmpeg");
+const ffmpeg_1 = require("../util/ffmpeg");
 let ffmpeg = ffmpeg_1.FFMPEG.instance;
-const arguments_1 = require("../arguments");
+const arguments_1 = require("../util/arguments");
 let args = arguments_1.ARGUMENTS.instance;
 const delay = require("delay");
+const util_1 = require("../util/util");
 var services;
 var bouquets;
 function asyncParseXML2JS(text) {
@@ -33,9 +34,6 @@ function asyncParseXML2JS(text) {
         });
     });
 }
-const asyncExpressHandler = fn => (req, res, next) => Promise
-    .resolve(fn(req, res, next))
-    .catch(next);
 function asyncEmptyFolder(video_path) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
@@ -117,19 +115,21 @@ function getSRefOfService(name) {
 }
 getServices();
 const router = express_1.Router();
-router.get('/', asyncExpressHandler((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/', util_1.Util.asyncHandler((req, res, next) => __awaiter(this, void 0, void 0, function* () {
     res.send(JSON.stringify(services, undefined, 2));
 })));
 var prev_name = "";
 const m3u8file = "playlist.m3u8";
-router.get('/:name', asyncExpressHandler((req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/:name', util_1.Util.asyncHandler((req, res, next) => __awaiter(this, void 0, void 0, function* () {
     let { name } = req.params;
     var sRef = getSRefOfService(name);
     if (sRef.length == 0) {
-        res.send("Service with that name does not exist!");
+        console.log("ERROR: Service [" + name + "] does not exist!");
+        res.send("ERROR: Service [" + name + "] does not exist!");
         return;
     }
     if (ffmpeg.isRunning() && name == prev_name) {
+        console.log("OK: Already transcoding " + name);
         res.redirect("/video/" + m3u8file);
         return;
     }
@@ -147,6 +147,7 @@ router.get('/:name', asyncExpressHandler((req, res, next) => __awaiter(this, voi
     yield delay(1000);
     yield asyncWaitFileCreated(video_path, m3u8file);
     prev_name = name;
+    console.log("OK: Started transcoding " + name);
     res.redirect("/video/" + m3u8file);
 })));
 exports.TVController = router;

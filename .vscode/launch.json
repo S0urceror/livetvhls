@@ -12,7 +12,8 @@
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
-            "args": ["vusolo2.lan","Favorieten HD 10-04-2015","1"]
+            "args": ["vusolo2.lan","Favorieten HD 10-04-2015","1"],
+            "sourceMaps": true
         }
     ]
 }
